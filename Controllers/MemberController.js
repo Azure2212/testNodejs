@@ -1,6 +1,8 @@
 const {config} = require('../Configurations/Configuration');
 const {MemberService} = require('../Services/MemberService');
 const MemberDTO = require("../Dtos/MemberDTO");
+const {RoleAccount} = require("../Enum/RoleAccount")
+const {authenticateToken, authorizeRole} = require("./AuthenticateToken");
 
 class MemberController {
     rootPathAPI = `/${config.NAME_COMPANY}/MemberAPI`;
@@ -12,7 +14,7 @@ class MemberController {
     // Define routes
     routes() {
         // Get all Members
-        this.app.post(`${this.rootPathAPI}/getAllMembers`, async (req, res) => {
+        this.app.post(`${this.rootPathAPI}/getAllMembers`, authenticateToken,authorizeRole([RoleAccount.GLOBAL_ADMIN, RoleAccount.ADMIN, RoleAccount.IT_TECHNICIAN]), async (req, res) => {
             try {
                 const Members = await MemberService.getAllMembers();
                 res.status(201).json({message: 'Get all Members successfully', data: Members});
@@ -23,7 +25,7 @@ class MemberController {
         });
 
         // Add a Member
-        this.app.post(`${this.rootPathAPI}/addMember`, async (req, res) => {
+        this.app.post(`${this.rootPathAPI}/addMember`, authenticateToken, authorizeRole([RoleAccount.GLOBAL_ADMIN, RoleAccount.IT_TECHNICIAN]), async (req, res) => {
             try {
                 let {ID, fullName, imgPath, phone, gmail, role, isShow, createdDate, updatedDate, isExist} = req.body;
                 if (!fullName || !role || !phone || !gmail)
@@ -42,7 +44,7 @@ class MemberController {
         });
 
         // Update a Member
-        this.app.post(`${this.rootPathAPI}/updateMemberByID`, async (req, res) => {
+        this.app.post(`${this.rootPathAPI}/updateMemberByID`, authenticateToken, authorizeRole([RoleAccount.GLOBAL_ADMIN, RoleAccount.IT_TECHNICIAN]), async (req, res) => {
             try {
                 let {ID, fullName, imgPath, phone, gmail, role, isShow, createdDate, updatedDate, isExist} = req.body;
                 if (!fullName || !role || !phone || !gmail)
@@ -61,7 +63,7 @@ class MemberController {
         });
 
         // Delete a Member
-        this.app.post(`${this.rootPathAPI}/deleteMemberByID`, async (req, res) => {
+        this.app.post(`${this.rootPathAPI}/deleteMemberByID`, authorizeRole([RoleAccount.GLOBAL_ADMIN, RoleAccount.IT_TECHNICIAN]), authenticateToken, async (req, res) => {
             try {
                 const {id} = req.query;
                 if (!id) {

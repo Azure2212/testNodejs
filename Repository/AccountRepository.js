@@ -10,6 +10,22 @@ class AccountRepository {
         }
     }
 
+    static async getAccountByUsername(username) {
+        try {
+            return await AccountEntity.findOne({ username: username });
+        } catch (error) {
+            console.error('Error retrieving accounts:', error);
+        }
+    }
+
+    static async getAccountByID(ID) {
+        try {
+            return await AccountEntity.findOne({ID: ID});
+        } catch (error) {
+            console.error('Error retrieving accounts:', error);
+        }
+    }
+
     static async addAccount(newAccount) {
         try {
             const newAccountInstance = new AccountEntity({

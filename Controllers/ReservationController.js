@@ -1,6 +1,8 @@
 const {config} = require('../Configurations/Configuration');
 const {ReservationService} = require('../Services/ReservationService');
 const ReservationDTO = require("../Dtos/ReservationDTO");
+const {RoleAccount} = require("../Enum/RoleAccount")
+const {authenticateToken, authorizeRole} = require("./AuthenticateToken");
 
 class ReservationController {
     rootPathAPI = `/${config.NAME_COMPANY}/ReservationAPI`;
@@ -12,7 +14,7 @@ class ReservationController {
     // Define routes
     routes() {
         // Get all Reservations
-        this.app.post(`${this.rootPathAPI}/getAllReservations`, async (req, res) => {
+        this.app.post(`${this.rootPathAPI}/getAllReservations`, authenticateToken, authorizeRole([RoleAccount.GLOBAL_ADMIN, RoleAccount.ADMIN, RoleAccount.IT_TECHNICIAN]), async (req, res) => {
             try {
                 const Reservations = await ReservationService.getAllReservations();
                 res.status(201).json({message: 'Get all Reservations successfully', data: Reservations});
@@ -23,7 +25,7 @@ class ReservationController {
         });
 
         // Add a Reservation
-        this.app.post(`${this.rootPathAPI}/addReservation`, async (req, res) => {
+        this.app.post(`${this.rootPathAPI}/addReservation`,  async (req, res) => {
             try {
                 let {ID, fullName, content, type, status, phone, gmail, address, subject, file, consultDate, createdDate, updatedDate, isExist} = req.body;
                 if (!fullName || !content || !type || !phone || !gmail || !subject || !consultDate)
@@ -43,7 +45,7 @@ class ReservationController {
         });
 
         // Update a Reservation
-        this.app.post(`${this.rootPathAPI}/updateReservationByID`, async (req, res) => {
+        this.app.post(`${this.rootPathAPI}/updateReservationByID`, authenticateToken, authorizeRole([RoleAccount.GLOBAL_ADMIN, RoleAccount.ADMIN, RoleAccount.IT_TECHNICIAN]), async (req, res) => {
             try {
                 let {ID, fullName, content, type, status, phone, gmail, address, subject, file, consultDate, createdDate, updatedDate, isExist} = req.body;
                 if (!fullName || !content || !type || !phone || !gmail || !subject || !consultDate)
@@ -63,7 +65,7 @@ class ReservationController {
         });
 
         // Delete a Reservation
-        this.app.post(`${this.rootPathAPI}/deleteReservationByID`, async (req, res) => {
+        this.app.post(`${this.rootPathAPI}/deleteReservationByID`, authenticateToken, authorizeRole([RoleAccount.GLOBAL_ADMIN, RoleAccount.ADMIN, RoleAccount.IT_TECHNICIAN]), async (req, res) => {
             try {
                 const {id} = req.query;
                 if (!id) {

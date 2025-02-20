@@ -4,8 +4,9 @@ const {ArticleController} = require('./Controllers/ArticleController')
 const {MemberController} = require('./Controllers/MemberController')
 const {ReservationController} = require('./Controllers/ReservationController')
 const {SystemController} = require('./Controllers/SystemController')
+const {AuthController} = require('./Controllers/AuthController')
 const express = require('express');
-const {connectDB} = require('./Repository/DBRepository')
+const {connectDB} = require('./Repository/DBConnection')
 
 class Server {
     constructor() {
@@ -16,6 +17,7 @@ class Server {
         this.memberController = new MemberController(this.app);
         this.reservationController = new ReservationController(this.app);
         this.systemController = new SystemController(this.app);
+        this.authController = new AuthController(this.app);
     }
 
     start() {

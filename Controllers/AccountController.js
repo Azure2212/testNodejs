@@ -1,6 +1,8 @@
 const {config} = require('../Configurations/Configuration');
 const {AccountService} = require('../Services/AccountService');
 const {AccountDTO} = require("../Dtos/AccountDTO");
+const {RoleAccount} = require("../Enum/RoleAccount")
+const {authenticateToken, authorizeRole} = require("./AuthenticateToken");
 
 class AccountController {
     rootPathAPI = `/${config.NAME_COMPANY}/AccountAPI`;
@@ -13,7 +15,7 @@ class AccountController {
     // Define routes
     routes() {
         // Get all accounts
-        this.app.post(`${this.rootPathAPI}/getAllAccounts`, async (req, res) => {
+        this.app.post(`${this.rootPathAPI}/getAllAccounts`, authenticateToken, authorizeRole([RoleAccount.GLOBAL_ADMIN, RoleAccount.ADMIN, RoleAccount.IT_TECHNICIAN]), async (req, res) => {
             try {
                 const accounts = await AccountService.getAllAccounts();
                 res.status(201).json({message: 'Get all Accounts successfully', data: accounts});
@@ -24,7 +26,7 @@ class AccountController {
         });
 
         // Add an account
-        this.app.post(`${this.rootPathAPI}/addAccount`, async (req, res) => {
+        this.app.post(`${this.rootPathAPI}/addAccount`, authenticateToken, authorizeRole([RoleAccount.GLOBAL_ADMIN, RoleAccount.IT_TECHNICIAN]), async (req, res) => {
             try {
                 let {ID, username, password, role, createdDate, updatedDate} = req.body;
                 if (!username || !password || !role)
@@ -43,7 +45,7 @@ class AccountController {
         });
 
         // Update an account
-        this.app.post(`${this.rootPathAPI}/updateAccountByID`, async (req, res) => {
+        this.app.post(`${this.rootPathAPI}/updateAccountByID`, authenticateToken, authorizeRole([RoleAccount.GLOBAL_ADMIN, RoleAccount.ADMIN, RoleAccount.IT_TECHNICIAN]), async (req, res) => {
             try {
                 let {ID, username, password, role, createdDate, updatedDate} = req.body;
                 if (!username || !password || !role)
@@ -62,14 +64,14 @@ class AccountController {
         });
 
         // Delete an account
-        this.app.post(`${this.rootPathAPI}/deleteAccountByID`, async (req, res) => {
+        this.app.post(`${this.rootPathAPI}/deleteAccountByID`,authenticateToken, authorizeRole([RoleAccount.GLOBAL_ADMIN, RoleAccount.IT_TECHNICIAN]), async (req, res) => {
             try {
                 const {id} = req.query;
                 if (!id) {
                     return res.status(400).json({error: 'ID is required'});
                 }
                 const deletedAccount = await AccountService.deleteAccountByID(id);
-                res.status(200).json({message: 'Account deleted successfully', data: deletedAccount});
+                res.status(200).json({message: !deletedAccount ? 'Account deleted successfully': 'unable to delete this account', data: deletedAccount});
             } catch (error) {
                 console.error('Error deleting account:', error);
                 res.status(500).json({error: 'Internal Server Error'});

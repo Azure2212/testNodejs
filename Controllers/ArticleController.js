@@ -1,6 +1,8 @@
 const {config} = require('../Configurations/Configuration');
 const {ArticleService} = require('../Services/ArticleService');
 const {ArticleDTO} = require("../Dtos/ArticleDTO");
+const {RoleAccount} = require("../Enum/RoleAccount")
+const {authenticateToken, authorizeRole} = require("./AuthenticateToken");
 
 class ArticleController {
     rootPathAPI = `/${config.NAME_COMPANY}/ArticleAPI`;
@@ -13,7 +15,7 @@ class ArticleController {
     // Define routes
     routes() {
         // Get all Articles
-        this.app.post(`${this.rootPathAPI}/getAllArticles`, async (req, res) => {
+        this.app.post(`${this.rootPathAPI}/getAllArticles`, authenticateToken, authorizeRole([RoleAccount.GLOBAL_ADMIN, RoleAccount.ADMIN, RoleAccount.IT_TECHNICIAN]), async (req, res) => {
             try {
                 const Articles = await ArticleService.getAllArticles();
                 res.status(201).json({message: 'Get all Articles successfully', data: Articles});
@@ -24,7 +26,7 @@ class ArticleController {
         });
 
         // Add an Article
-        this.app.post(`${this.rootPathAPI}/addArticle`, async (req, res) => {
+        this.app.post(`${this.rootPathAPI}/addArticle`, authenticateToken, authorizeRole([RoleAccount.GLOBAL_ADMIN, RoleAccount.ADMIN, RoleAccount.IT_TECHNICIAN]), async (req, res) => {
             try {
                 let {ID, serial, title, type, content, views, createdDate, updatedDate} = req.body;
                 if (!serial || !title || !type || !content)
@@ -43,7 +45,7 @@ class ArticleController {
         });
 
         // Update an Article
-        this.app.post(`${this.rootPathAPI}/updateArticleByID`, async (req, res) => {
+        this.app.post(`${this.rootPathAPI}/updateArticleByID`, authenticateToken, authorizeRole([RoleAccount.GLOBAL_ADMIN, RoleAccount.ADMIN, RoleAccount.IT_TECHNICIAN]), async (req, res) => {
             try {
                 let {ID, serial, title, type, content, views, createdDate, updatedDate} = req.body;
                 if (!serial || !title || !type || !content)
@@ -62,7 +64,7 @@ class ArticleController {
         });
 
         // Delete an Article
-        this.app.post(`${this.rootPathAPI}/deleteArticleByID`, async (req, res) => {
+        this.app.post(`${this.rootPathAPI}/deleteArticleByID`, authenticateToken, authorizeRole([RoleAccount.GLOBAL_ADMIN, RoleAccount.ADMIN, RoleAccount.IT_TECHNICIAN]), async (req, res) => {
             try {
                 const {id} = req.query;
                 if (!id) {
